@@ -1,0 +1,19 @@
+   11  cd /fs/lustre/scratch/student13/
+   16  mkdir -p CTA200_2022/assignment_1
+   17  touch CTA200_2022/assignment_1/README.md
+   18  vi CTA200_2022/assignment_1/README.md 
+   42  find /home/murray/ -name "Hello_*"
+   45  cp /home/murray/tmp/Hello_world.py /fs/lustre/scratch/student13/CTA200_2022/assignment_1/Hello_world-branch.py
+   46  cp /home/murray/Papers/tmp/Hello_world.c /fs/lustre/scratch/student13/CTA200_2022/assignment_1/Hello_world-branch.c 
+   49  cd CTA200_2022/assignment_1/
+   60  gcc Hello_world-branch.c -o Hello_world.x
+   63  vi Hello_world-branch.c 
+   64  gcc Hello_world-branch.c -o Hello_world.x
+   65  ./Hello_world.x 
+   66  vi Hello_world-branch.py 
+   67  ./Hello_world.x > output_c.txt
+   68  python Hello_world-branch.py > output_python.txt
+   69  cat output_c.txt 
+   70  cat output_python.txt 
+   71  history
+   72  history > history.txt
