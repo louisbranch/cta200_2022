@@ -48,7 +48,7 @@ def newton(f: Callable, df: Callable, x0: float, epsilon=1e-6,
     Returns
     -------
     float or None
-        Root of the function if exists, None otherwise.
+        Root of the function if the iteration is successful, None otherwise.
     """
     
     xn = x0
