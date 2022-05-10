@@ -1,20 +1,22 @@
 import numpy as np
+import warnings
 from scipy.integrate import solve_ivp
 from typing import List, Tuple
 
 Sigma = 10.
 Rayleigh = 28
 Scale = 8./3.
-Time = 60. # integration time (s)
+Time = 60. # in seconds
+DeltaT = 0.01
 
 def mandelbrot_set(num_points = 50, max_iter = 10) -> np.array:
-    """Implementation of a Madelbrot set using numpy.arrays.
+    """Implementation of a Madelbrot set using numpy.array.
 
     Parameters
     ----------
 
     num_points : int, optional
-        The number of points for the x, y place
+        The number of points for the x, y plane.
     max_iter : int, optional
         Maximum number of iterations to check whether the value is still
         bounded.
@@ -39,29 +41,49 @@ def mandelbrot_set(num_points = 50, max_iter = 10) -> np.array:
     iter = np.zeros((num_points, num_points))
 
     for i in range(max_iter):
-        z = z**2 + c
-        mask = np.abs(z) > 2
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            z = z**2 + c
+            mask = np.abs(z) > 2
         iter[mask] = i
 
     return iter
 
-def lorenz(t: float, xyz: Tuple[float, float, float], sigma: float, r: float,
- b: float) -> Tuple[float, float, float]:
-
-    x, y, z = xyz
-
-    dx = -sigma * (x - y)
-    dy = r*x - y - x*z
-    dz = -b*z + x*y
-
-    return dx, dy, dz
-
 def lorenz_integral(space : np.array, w0 = [0., 1., 0.]) -> Tuple[List, List]:
-    tspan = [0., Time]
+    """Solve a system of ordinary equations simulating chaotic atmospheric
+    conditions.
+
+    Parameters
+    ----------
+
+    space : numpy.array
+        Set of points for the solution.
+    w0 : List, optional
+        Initial conditions for the system.
+
+    Returns
+    ------
+
+    Tuple[List, List]
+        Tuple containing the timestamps and solutions for X, Y, Z.
+    """
+
+    def lorenz(t: float, xyz: Tuple[float, float, float], sigma: float,
+     r: float, b: float) -> Tuple[float, float, float]:
+
+        x, y, z = xyz
+
+        dx = -sigma * (x - y)
+        dy = r*x - y - x*z
+        dz = -b*z + x*y
+
+        return dx, dy, dz
+
+    tspan = (0., Time)
     args = (Sigma, Rayleigh, Scale)
 
     result = solve_ivp(lorenz, tspan, w0, args=args, dense_output=True)
 
     sol = result.sol(space)
 
-    return space / 0.01, sol
+    return space / DeltaT, sol
