@@ -1,5 +1,11 @@
 import numpy as np
-from typing import Tuple
+from scipy.integrate import solve_ivp
+from typing import List, Tuple
+
+Sigma = 10.
+Rayleigh = 28
+Scale = 8./3.
+Time = 60. # integration time (s)
 
 def mandelbrot_set(num_points = 50, max_iter = 10) -> np.array:
     """Implementation of a Madelbrot set using numpy.arrays.
@@ -27,7 +33,7 @@ def mandelbrot_set(num_points = 50, max_iter = 10) -> np.array:
     y = np.linspace(-2, 2, num=num_points, dtype=np.complex64) * 1j
     c = x.reshape((1,num_points)) + y.reshape((num_points,1))
 
-    # Create another 2D plane to store f(z) = z^2 + c and another to
+    # Create another 2D array to store f(z) = z^2 + c and another to
     # store the number of iterations
     z = np.zeros((num_points, num_points), dtype=np.complex64)
     iter = np.zeros((num_points, num_points))
@@ -38,3 +44,24 @@ def mandelbrot_set(num_points = 50, max_iter = 10) -> np.array:
         iter[mask] = i
 
     return iter
+
+def lorenz(t: float, xyz: Tuple[float, float, float], sigma: float, r: float,
+ b: float) -> Tuple[float, float, float]:
+
+    x, y, z = xyz
+
+    dx = -sigma * (x - y)
+    dy = r*x - y - x*z
+    dz = -b*z + x*y
+
+    return dx, dy, dz
+
+def lorenz_integral(space : np.array, w0 = [0., 1., 0.]) -> Tuple[List, List]:
+    tspan = [0., Time]
+    args = (Sigma, Rayleigh, Scale)
+
+    result = solve_ivp(lorenz, tspan, w0, args=args, dense_output=True)
+
+    sol = result.sol(space)
+
+    return space / 0.01, sol
