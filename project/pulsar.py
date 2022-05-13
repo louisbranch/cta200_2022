@@ -46,3 +46,10 @@ ts: u.s, steps: np.array):
         k_integrated.append(result / ts.value)
 
     return k_integrated
+
+def gaussian_noise(signal: np.array, mu: float):
+    #mu = np.mean(signal)
+    #sigma = np.std(signal) * noise
+    n = signal.shape
+    noise = np.random.normal(0, mu, n)
+    return signal + noise
