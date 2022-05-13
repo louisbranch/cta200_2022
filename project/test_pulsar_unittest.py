@@ -45,7 +45,7 @@ class TestGaussianNoise(unittest.TestCase):
         self.assertIsNone(np.testing.assert_almost_equal(noise,
          [0.32, 0.87], decimal=2))
 
-class TestIntensity(unittest.TestCase):
+class TestBrightness(unittest.TestCase):
 
     """
     solve A*e^([log(2)/(2sin^2(D*pi/2))][cos((phi+((2pi)/T)*t)-1)])
@@ -57,10 +57,38 @@ class TestIntensity(unittest.TestCase):
     d = 0.1
     period = 0.01 * u.s # 10ms
 
-    def test_intensity_at_t0(self):
-        val = intensity(self.peak, self.phi, self.d, self.period, 0*u.s)
-        self.assertEqual(round(val, -3), 1.41437e8)
+    def test_brightness_at_t0(self):
+        t = 0*u.s
+        i = brightness(self.peak, self.phi, self.d, self.period, t)
+        self.assertEqual(round(i.value, -3), 1.41437e8)
 
-    def test_intensity_at_half_period(self):
-        val = intensity(self.peak, self.phi, self.d, self.period, self.period/2)
-        self.assertAlmostEqual(val, 7.07028e-5, places=5)
+    def test_brightness_at_half_period(self):
+        t = self.period/2
+        i = brightness(self.peak, self.phi, self.d, self.period, t)
+        self.assertAlmostEqual(i.value, 7.07028e-5, places=5)
+
+    def test_brightness_at_1s(self):
+        t = 1*u.s
+        i = brightness(self.peak, self.phi, self.d, self.period, t)
+        self.assertEqual(round(i.value, -3), 1.41437e8)
+
+class TestLinearBrightness(unittest.TestCase):
+
+    peak = 100
+    phi = 1 * u.rad
+    d = 0.1
+    period = 0.01 * u.s # 10ms
+
+    def test_linear_brightness(self):
+        tframe = np.linspace(0, 2, 1000) * u.s
+        i = linear_brightness(self.peak, self.phi, self.d, self.period, tframe)
+
+        # highest
+        self.assertEqual(round(i[0].value, -3), 1.41437e8)
+
+        # lowest
+        mid = tframe.size//2
+        self.assertEqual(round(i[mid].value, -3), 9.411e6)
+        
+        # highest
+        self.assertEqual(round(i[-1].value, -3), 1.41437e8)

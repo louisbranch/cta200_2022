@@ -4,6 +4,8 @@ from astropy import units as u
 from scipy.integrate import quad
 from typing import Any
 
+MU = 1 * u.rad
+
 def concentration(d: float) -> float:
     """Calculate concentration (reciprocal of dispersion) using d, the duty
     cycle value.
@@ -20,24 +22,24 @@ def angle(phi0: u.rad, period: u.s, dt: u.s) -> u.rad:
     """
     return phi0 + speed(period) * dt
 
-def intensity(peak: float, phi0: u.rad, d: float, period: u.s,
+def brightness(peak: float, phi0: u.rad, d: float, period: u.s,
  time: u.s) -> float:
 
     kappa = concentration(d)
     phi = angle(phi0, period, time)
-    return peak * np.exp(kappa * np.cos(phi.value - 1))
+    return peak * np.exp(kappa * np.cos(phi - MU))
 
-def linear_intensity(peak: float, phi0: u.rad, d: float, period: u.s, 
+def linear_brightness(peak: float, phi0: u.rad, d: float, period: u.s, 
 tframe: np.array) -> np.array:
 
-    mapping = lambda t: intensity(peak, phi0, d, period, t)
+    mapping = lambda t: brightness(peak, phi0, d, period, t)
 
     return np.apply_along_axis(mapping, 0, tframe)
 
-def integrated_intensity(peak: float, phi0: u.rad, d: float, period: u.s,
+def integrated_brightness(peak: float, phi0: u.rad, d: float, period: u.s,
 ts: u.s, steps: np.array):
 
-    integrand = lambda t : intensity(peak, phi0, d, period, t*u.s)
+    integrand = lambda t : brightness(peak, phi0, d, period, t*u.s)
 
     k_integrated = []
 
