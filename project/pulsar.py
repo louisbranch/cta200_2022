@@ -37,12 +37,12 @@ tframe: np.array) -> np.array:
 def integrated_intensity(peak: float, phi0: u.rad, d: float, period: u.s,
 ts: u.s, steps: np.array):
 
-    integrand = lambda t : intensity(peak, phi0, d, period, t*ts)
+    integrand = lambda t : intensity(peak, phi0, d, period, t*u.s)
 
     k_integrated = []
 
-    for k in steps:
-        result, err = quad(integrand, k, k+1)
+    for i in range(len(steps)-1):
+        result, err = quad(integrand, steps[i], steps[i+1])
         k_integrated.append(result / ts.value)
 
     return k_integrated
