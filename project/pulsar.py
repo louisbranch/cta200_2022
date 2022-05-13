@@ -22,24 +22,36 @@ def angle(phi0: u.rad, period: u.s, dt: u.s) -> u.rad:
     """
     return phi0 + speed(period) * dt
 
-def brightness(peak: float, phi0: u.rad, d: float, period: u.s,
+def brightness(phi0: u.rad, d: float, period: u.s, peak: float,
  time: u.s) -> float:
 
     kappa = concentration(d)
     phi = angle(phi0, period, time)
     return peak * np.exp(kappa * np.cos(phi - MU))
 
-def linear_brightness(peak: float, phi0: u.rad, d: float, period: u.s, 
-tframe: np.array) -> np.array:
+def linear_brightness(phi0: u.rad, d: float, period: u.s, peak: float,
+timeline: np.array) -> np.array:
 
-    mapping = lambda t: brightness(peak, phi0, d, period, t)
+    mapping = lambda t: brightness(phi0, d, period, peak, t)
 
-    return np.apply_along_axis(mapping, 0, tframe)
+    return np.apply_along_axis(mapping, 0, timeline)
 
-def integrated_brightness(peak: float, phi0: u.rad, d: float, period: u.s,
-ts: u.s, steps: np.array):
+def noisy_brightness(phi0: u.rad, d: float, period: u.s, peak: float,
+stddev: float, timeline: np.array) -> np.array:
 
-    integrand = lambda t : brightness(peak, phi0, d, period, t*u.s)
+    noise = gaussian_noise(timeline, stddev)
+    acc = []
+
+    for n, time in zip(noise, timeline):
+        b = brightness(phi0, d, period, peak+n, time)
+        acc.append(b)
+
+    return acc
+
+def integrated_brightness(phi0: u.rad, d: float, period: u.s,
+ts: u.s, peak: float, steps: np.array):
+
+    integrand = lambda t : brightness(phi0, d, period, peak, t*u.s)
 
     k_integrated = []
 
@@ -49,9 +61,6 @@ ts: u.s, steps: np.array):
 
     return k_integrated
 
-def gaussian_noise(signal: np.array, mu: float):
-    #mu = np.mean(signal)
-    #sigma = np.std(signal) * noise
+def gaussian_noise(signal: np.array, stddev: float):
     n = signal.shape
-    noise = np.random.normal(0, mu, n)
-    return signal + noise
+    return np.random.normal(0, stddev, n)
