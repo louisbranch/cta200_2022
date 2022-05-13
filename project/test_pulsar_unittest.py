@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from math import log, pi, sin
 from astropy import units as u
-from pulsar import gaussian_noise, speed, concentration, angle
+from pulsar import *
 
 class TestSpeed(unittest.TestCase):
 
@@ -44,3 +44,23 @@ class TestGaussianNoise(unittest.TestCase):
         noise = gaussian_noise(signal, 0.2)
         self.assertIsNone(np.testing.assert_almost_equal(noise,
          [0.32, 0.87], decimal=2))
+
+class TestIntensity(unittest.TestCase):
+
+    """
+    solve A*e^([log(2)/(2sin^2(D*pi/2))][cos((phi+((2pi)/T)*t)-1)])
+    for A=100,phi=1rad,D=0.1,T=0.01s,t=0s
+    """
+
+    peak = 100
+    phi = 1 * u.rad
+    d = 0.1
+    period = 0.01 * u.s # 10ms
+
+    def test_intensity_at_t0(self):
+        val = intensity(self.peak, self.phi, self.d, self.period, 0*u.s)
+        self.assertEqual(round(val, -3), 1.41437e8)
+
+    def test_intensity_at_half_period(self):
+        val = intensity(self.peak, self.phi, self.d, self.period, self.period/2)
+        self.assertAlmostEqual(val, 7.07028e-5, places=5)
