@@ -1,26 +1,26 @@
 import unittest
 import numpy as np
 from math import log, pi, sin
-from astropy import units as u
+from astropy.units import s, rad
 from pulsar import *
 
 # constants of the project's initial profile
-PHI = 1 * u.rad
+PHI = 1 * rad
 D = 0.1
-T = 0.01 * u.s # 10ms
+T = 0.01 * s # 10ms
 IPEAK = 100
 
 class TestSpeed(unittest.TestCase):
 
     def test_using_seconds(self):
-        omega = speed(1 * u.s)
+        omega = speed(1 * s)
         self.assertEqual(omega.value, 2*pi)
-        self.assertEqual(omega.unit, u.Unit("rad / s"))
+        self.assertEqual(omega.unit, "rad / s")
 
     def test_using_ms(self):
-        omega = speed(10**-2 * u.s)
+        omega = speed(10**-2 * s)
         self.assertEqual(omega.value, 2*pi*100)
-        self.assertEqual(omega.unit, u.Unit("rad / s"))
+        self.assertEqual(omega.unit, "rad / s")
 
 class TestConcentration(unittest.TestCase):
 
@@ -35,11 +35,11 @@ class TestConcentration(unittest.TestCase):
 class TestAngle(unittest.TestCase):
 
     def test_full_revolution(self):
-        phi = angle(1 * u.rad, 10 * u.s, 10 * u.s)
+        phi = angle(1 * rad, 10 * s, 10 * s)
         self.assertEqual(phi.value, 1 + 2*pi)
 
     def test_half_revolution(self):
-        phi = angle(1 * u.rad, 10 * u.s, 5 * u.s)
+        phi = angle(1 * rad, 10 * s, 5 * s)
         self.assertEqual(phi.value, 1 + pi)
 
 class TestGaussianNoise(unittest.TestCase):
@@ -59,7 +59,7 @@ class TestBrightness(unittest.TestCase):
     """
 
     def test_brightness_at_t0(self):
-        t = 0*u.s
+        t = 0*s
         i = brightness(PHI, D, T, IPEAK, t)
         self.assertEqual(round(i.value, -3), 1.41437e8)
 
@@ -69,14 +69,14 @@ class TestBrightness(unittest.TestCase):
         self.assertAlmostEqual(i.value, 7.07028e-5, places=5)
 
     def test_brightness_at_1s(self):
-        t = 1*u.s
+        t = 1*s
         i = brightness(PHI, D, T, IPEAK, t)
         self.assertEqual(round(i.value, -3), 1.41437e8)
 
 class TestLinearBrightness(unittest.TestCase):
 
     def test_linear_brightness(self):
-        timeline = np.linspace(0, 2, 1000) * u.s
+        timeline = np.linspace(0, 2, 1000) * s
         i = linear_brightness(PHI, D, T, IPEAK, timeline)
 
         # highest
@@ -92,7 +92,7 @@ class TestLinearBrightness(unittest.TestCase):
 class TestSearchTemplate(unittest.TestCase):
 
     def test_at_peak_unit(self):
-        timeline = np.linspace(0, 2, 1000) * u.s
+        timeline = np.linspace(0, 2, 1000) * s
         i = search_template(PHI, D, T, timeline)
 
         # highest
