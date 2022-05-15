@@ -38,8 +38,12 @@ class TestAngle(unittest.TestCase):
 
 class TestGaussianNoise(unittest.TestCase):
 
-    def test_small_noise(self):
-        return None
+    def test_noise(self):
+        np.random.seed(0)
+        signal = np.array([0, 1, 2])
+        noise = gaussian_noise(signal, .5)
+        return self.assertIsNone(np.testing.assert_array_almost_equal(noise,
+         [0.88, 0.2 , 0.49], decimal=2))
 
 class TestBrightness(unittest.TestCase):
 
