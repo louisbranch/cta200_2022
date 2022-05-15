@@ -213,7 +213,7 @@ def gaussian_noise(signal: np.array, stddev: float) -> np.array:
     ----------
 
     signal: np.array
-        Array to be used as the shape of the noise
+        Array to be used as the shape of the noise.
     stddev: float
         Amount of dispersion for the signal values.
 
