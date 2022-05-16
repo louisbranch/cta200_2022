@@ -231,9 +231,6 @@ def gaussian_noise(signal: np.array, stddev: float) -> np.array:
     n = signal.shape
     return np.random.normal(0, stddev, n)
 
-def measurement() -> np.array:
-    return None
-
 def search_parameters() -> List:
     Parameters = namedtuple('Parameters', ['D', 'omega', 'phi0'])
 
@@ -262,3 +259,9 @@ def search_templates(timeseries: np.array, params=[]) -> np.array:
         acc.append(brightness)
 
     return np.array(acc)
+
+def measurement(timeseries: np.array, params=[]) -> np.array:
+    return None
+
+def brightness_estimator(tk: np.array, dk: np.array) -> float:
+    return np.sum(tk + dk) / np.sum(tk * tk)

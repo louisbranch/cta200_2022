@@ -1,7 +1,7 @@
 from re import template
 import unittest
 import numpy as np
-from math import log, pi, sin
+from math import pi
 from astropy.units import s, rad
 from pulsar import *
 
@@ -10,6 +10,8 @@ PHI = 1 * rad
 D = 0.1
 T = 0.01 * s # 10ms
 IPEAK = 100
+TIMEFRAME = 2 # s
+RATE = 200 # Hz
 
 class TestSpeed(unittest.TestCase):
 
@@ -77,40 +79,40 @@ class TestBrightness(unittest.TestCase):
 class TestLinearBrightness(unittest.TestCase):
 
     def test_linear_brightness(self):
-        timeseries = np.linspace(0, 2, 1000) * s
+        timeseries = np.linspace(0, TIMEFRAME, TIMEFRAME*RATE) * s
         i = linear_brightness(PHI, D, T, IPEAK, timeseries)
 
         # highest
-        self.assertEqual(round(i[0].value, -3), 1.41437e8)
+        self.assertEqual(i[0].value.round(), 141_437_093)
 
         # lowest
         mid = timeseries.size//2
-        self.assertEqual(round(i[mid].value, -3), 9.411e6)
+        self.assertEqual(i[mid].value.round(), 95)
         
         # highest
-        self.assertEqual(round(i[-1].value, -3), 1.41437e8)
+        self.assertEqual(i[-1].value.round(), 141_437_093)
 
 class TestSearchTemplates(unittest.TestCase):
 
     def test_with_original_profile(self):
-        timeseries = np.linspace(0, 2, 1000) * s
-        params = [Parameters(.1, 2*pi*rad/(0.01*s), 1*rad)]
+        timeseries = np.linspace(0, TIMEFRAME, TIMEFRAME*RATE) * s
+        params = [Parameters(.1, 2*pi*rad/(T), PHI)]
         templates = search_templates(timeseries, params)
         i = templates[0]
 
         # highest
-        self.assertAlmostEqual(i[0].value, 1.414371e6, 0)
+        self.assertEqual(round(i[0], 0), 1_414_371)
 
         # lowest
         mid = timeseries.size//2
-        self.assertAlmostEqual(i[mid].value, 9.411e4, 0)
+        self.assertEqual(round(i[mid], 0), 1)
         
         # highest
-        self.assertAlmostEqual(i[-1].value, 1.414371e6, 0)
+        self.assertEqual(round(i[-1], 0), 1_414_371)
 
     def test_with_sample_parameters(self):
-        n = 1000
-        timeseries = np.linspace(0, 2, n) * s
+        n = TIMEFRAME*RATE
+        timeseries = np.linspace(0, TIMEFRAME, n) * s
         templates = search_templates(timeseries)
 
         self.assertEqual(templates.shape, (6, n))
