@@ -245,7 +245,7 @@ def search_parameters() -> List:
         Parameters(.16, omega(.05), .95*rad),
     ]
 
-def search_templates(timeseries: np.array, params=[]) -> np.array:
+def search_templates(dt: s, steps: np.array, params=[]) -> np.array:
     peak = 1 # unit
 
     if len(params) == 0:
@@ -253,11 +253,13 @@ def search_templates(timeseries: np.array, params=[]) -> np.array:
 
     acc = []
     for d, omega, phi0 in params:
-        kappa = concentration(d)
-        phi = phi0 + omega*timeseries
-        brightness = peak * np.exp(kappa * np.cos(phi - MU))
-        acc.append(brightness)
-
+        ik = []
+        period = (2*pi*rad)/omega
+        integrand = lambda t : brightness(phi0, d, period, peak, t*s)
+        for i in range(len(steps)-1):
+            result, err = quad(integrand, steps[i], steps[i+1])
+            ik.append(result / dt.value)
+        acc.append(ik)
     return np.array(acc)
 
 def measurement(timeseries: np.array, params=[]) -> np.array:

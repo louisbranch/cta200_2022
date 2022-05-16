@@ -12,6 +12,7 @@ T = 0.01 * s # 10ms
 IPEAK = 100
 TIMEFRAME = 2 # s
 RATE = 5e-3 # 5ms / 200Hz
+DT = 0.00025 * s # 0.25ms
 
 class TestSpeed(unittest.TestCase):
 
@@ -87,13 +88,14 @@ class TestLinearBrightness(unittest.TestCase):
 class TestSearchTemplates(unittest.TestCase):
 
     def test_with_original_profile(self):
-        timeseries = np.arange(0, TIMEFRAME, RATE) * s
+        time = .2
+        steps = np.arange(0, time, RATE)
         params = [Parameters(.1, 2*pi*rad/(T), PHI)]
-        templates = search_templates(timeseries, params)
-        self.assertAlmostEqual(np.max(templates[0]), 1414371, 0)
-        self.assertAlmostEqual(np.min(templates[0]), 0, 0)
+        templates = search_templates(DT, steps, params)
+        self.assertEqual(templates.shape, (1, (time/RATE) - 1))
 
     def test_with_sample_parameters(self):
-        timeseries = np.arange(0, TIMEFRAME, RATE) * s
-        templates = search_templates(timeseries)
-        self.assertEqual(templates.shape, (6, TIMEFRAME/RATE))
+        time = .2
+        steps = np.arange(0, time, RATE)
+        templates = search_templates(DT, steps)
+        self.assertEqual(templates.shape, (6, (time/RATE) - 1))
