@@ -240,12 +240,12 @@ def search_parameters() -> List:
     omega = lambda T: (2*pi*rad)/(T*s)
 
     return [
-        Parameters(.2,  omega(.1),  0*rad),
-        Parameters(.4,  omega(.2),  (pi/4)*rad),
-        Parameters(.8,  omega(.3),  pi*rad),
-        Parameters(.1,  omega(.01), 1*rad), # original values
-        Parameters(.12, omega(.02), (pi/2)*rad),
-        Parameters(.16, omega(.03), (3*pi/4)*rad),
+        Parameters(.2,  omega(.025), 0*rad),
+        Parameters(.4,  omega(.005), .25*rad),
+        Parameters(.8,  omega(.075), .5*rad),
+        Parameters(.1,  omega(.01),  1*rad), # original values
+        Parameters(.12, omega(.02), .75*rad),
+        Parameters(.16, omega(.05), .95*rad),
     ]
 
 def search_templates(timeseries: np.array, params=[]) -> np.array:
