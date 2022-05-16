@@ -232,20 +232,49 @@ def gaussian_noise(signal: np.array, stddev: float) -> np.array:
     return np.random.normal(0, stddev, n)
 
 def search_parameters() -> List:
+    """
+    Create a sample of parameters for the brightness search template.
+
+    Returns
+    -------
+
+    List[Parameters]
+        List of tuples with values for D, omega, and phi0.
+    """
     Parameters = namedtuple('Parameters', ['D', 'omega', 'phi0'])
 
     omega = lambda T: (2*pi*rad)/(T*s)
 
     return [
-        Parameters(.2,  omega(.025), 0*rad),
-        Parameters(.4,  omega(.005), .25*rad),
-        Parameters(.8,  omega(.075), .5*rad),
+        Parameters(.2,  omega(1), pi*rad),
+        Parameters(.4,  omega(2.5), pi/2*rad),
+        Parameters(.8,  omega(3.14), pi/4*rad),
         Parameters(.1,  omega(.01),  1*rad), # original values
-        Parameters(.12, omega(.02), .75*rad),
-        Parameters(.16, omega(.05), .95*rad),
+        Parameters(.12, omega(.001), 3*pi/4*rad),
+        Parameters(.16, omega(.5), 2*pi*rad),
     ]
 
 def search_templates(dt: s, steps: np.array, params=[]) -> np.array:
+    """
+    Integrate the observed brightness for a list of search parameters.
+
+    Parameters
+    ----------
+
+    dt: s
+        Delta time between each integration step.
+    steps: np.array
+        Series of steps to integrate from.
+    params: List[Parameters], optional
+        Template values, if empty defaults to `search_params()`
+
+    Returns
+    -------
+
+    np.array
+        Observed brightness at each data point in the time series for each
+        search template.
+    """
     peak = 1 # unit
 
     if len(params) == 0:
@@ -262,8 +291,22 @@ def search_templates(dt: s, steps: np.array, params=[]) -> np.array:
         acc.append(ik)
     return np.array(acc)
 
-def measurement(timeseries: np.array, params=[]) -> np.array:
-    return None
-
 def brightness_estimator(tk: np.array, dk: np.array) -> float:
-    return np.sum(np.dot(tk, dk)) / np.sum(np.dot(tk, tk))
+    """
+    Calculate the brightness estimate for a given template and measurement.
+
+    Parameters
+    ----------
+
+    tk: np.array
+        Search template for estimation.
+    dk: np.array
+        Measurement to compare againt.
+
+    Returns
+    -------
+
+    float
+        How close the brightness is to the measurement.
+    """
+    return np.dot(tk, dk) / np.dot(tk, tk)
