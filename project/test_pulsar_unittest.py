@@ -11,7 +11,7 @@ D = 0.1
 T = 0.01 * s # 10ms
 IPEAK = 100
 TIMEFRAME = 2 # s
-RATE = 200 # Hz
+RATE = 5e-3 # 5ms / 200Hz
 
 class TestSpeed(unittest.TestCase):
 
@@ -79,40 +79,21 @@ class TestBrightness(unittest.TestCase):
 class TestLinearBrightness(unittest.TestCase):
 
     def test_linear_brightness(self):
-        timeseries = np.linspace(0, TIMEFRAME, TIMEFRAME*RATE) * s
+        timeseries = np.arange(0, TIMEFRAME, RATE) * s
         i = linear_brightness(PHI, D, T, IPEAK, timeseries)
-
-        # highest
-        self.assertEqual(i[0].value.round(), 141_437_093)
-
-        # lowest
-        mid = timeseries.size//2
-        self.assertEqual(i[mid].value.round(), 95)
-        
-        # highest
-        self.assertEqual(i[-1].value.round(), 141_437_093)
+        self.assertAlmostEqual(np.max(i).value, 141437093, 0)
+        self.assertAlmostEqual(np.min(i).value, 0, 0)
 
 class TestSearchTemplates(unittest.TestCase):
 
     def test_with_original_profile(self):
-        timeseries = np.linspace(0, TIMEFRAME, TIMEFRAME*RATE) * s
+        timeseries = np.arange(0, TIMEFRAME, RATE) * s
         params = [Parameters(.1, 2*pi*rad/(T), PHI)]
         templates = search_templates(timeseries, params)
-        i = templates[0]
-
-        # highest
-        self.assertEqual(round(i[0], 0), 1_414_371)
-
-        # lowest
-        mid = timeseries.size//2
-        self.assertEqual(round(i[mid], 0), 1)
-        
-        # highest
-        self.assertEqual(round(i[-1], 0), 1_414_371)
+        self.assertAlmostEqual(np.max(templates[0]), 1414371, 0)
+        self.assertAlmostEqual(np.min(templates[0]), 0, 0)
 
     def test_with_sample_parameters(self):
-        n = TIMEFRAME*RATE
-        timeseries = np.linspace(0, TIMEFRAME, n) * s
+        timeseries = np.arange(0, TIMEFRAME, RATE) * s
         templates = search_templates(timeseries)
-
-        self.assertEqual(templates.shape, (6, n))
+        self.assertEqual(templates.shape, (6, TIMEFRAME/RATE))
