@@ -264,4 +264,4 @@ def measurement(timeseries: np.array, params=[]) -> np.array:
     return None
 
 def brightness_estimator(tk: np.array, dk: np.array) -> float:
-    return np.sum(tk + dk) / np.sum(tk * tk)
+    return np.sum(np.dot(tk, dk)) / np.sum(np.dot(tk, tk))
