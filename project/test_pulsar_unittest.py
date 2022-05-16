@@ -76,31 +76,33 @@ class TestBrightness(unittest.TestCase):
 class TestLinearBrightness(unittest.TestCase):
 
     def test_linear_brightness(self):
-        timeline = np.linspace(0, 2, 1000) * s
-        i = linear_brightness(PHI, D, T, IPEAK, timeline)
+        timeseries = np.linspace(0, 2, 1000) * s
+        i = linear_brightness(PHI, D, T, IPEAK, timeseries)
 
         # highest
         self.assertEqual(round(i[0].value, -3), 1.41437e8)
 
         # lowest
-        mid = timeline.size//2
+        mid = timeseries.size//2
         self.assertEqual(round(i[mid].value, -3), 9.411e6)
         
         # highest
         self.assertEqual(round(i[-1].value, -3), 1.41437e8)
 
-class TestSearchTemplate(unittest.TestCase):
+class TestSearchTemplates(unittest.TestCase):
 
     def test_at_peak_unit(self):
-        timeline = np.linspace(0, 2, 1000) * s
-        i = search_template(PHI, D, T, timeline)
+        timeseries = np.linspace(0, 2, 1000) * s
+        params = [Parameters(.1, 2*pi*rad/(0.01*s), 1*rad)]
+        templates = search_templates(timeseries, params)
+        i = templates[0]
 
         # highest
-        self.assertEqual(round(i[0].value, -1), 1.41437e6)
+        self.assertAlmostEqual(i[0].value, 1.414371e6, 0)
 
         # lowest
-        mid = timeline.size//2
-        self.assertEqual(round(i[mid].value, -1), 9.411e4)
+        mid = timeseries.size//2
+        self.assertAlmostEqual(i[mid].value, 9.411e4, 0)
         
         # highest
-        self.assertEqual(round(i[-1].value, -1), 1.41437e6)
+        self.assertAlmostEqual(i[-1].value, 1.414371e6, 0)

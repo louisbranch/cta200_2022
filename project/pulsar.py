@@ -2,10 +2,14 @@ from math import log, sin, pi
 import numpy as np
 from astropy.units import s, rad
 from scipy.integrate import quad
+from collections import namedtuple
 
 # Measure of location (the distribution is clustered around mu).
 # Analogous to the mean in a normal distribuition.
 MU = 1 * rad
+
+# Search parameters used for linear regression
+Parameters = namedtuple('Parameters', ['D', 'omega', 'phi0'])
 
 def concentration(d: float) -> float:
     """Concentration parameter (reciprocal of dispersion) for d, the duty
@@ -95,7 +99,7 @@ def brightness(phi0: rad, d: float, period: s, peak: float,
     return peak * np.exp(kappa * np.cos(phi - MU))
 
 def linear_brightness(phi0: rad, d: float, period: s, peak: float,
-timeline: np.array) -> np.array:
+timeseries: np.array) -> np.array:
     """
     Observed brightness of a pulsar using a von Mises distribution for a time
     series.
@@ -111,7 +115,7 @@ timeline: np.array) -> np.array:
         The time in seconds for one revolution around the circle.
     peak: float
         Peak brightness of the pulsar.
-    timelime: np.array
+    timeseries: np.array
         Time series in which the first dimension contains time values in 
         seconds.
 
@@ -124,10 +128,10 @@ timeline: np.array) -> np.array:
 
     mapping = lambda t: brightness(phi0, d, period, peak, t)
 
-    return np.apply_along_axis(mapping, 0, timeline)
+    return np.apply_along_axis(mapping, 0, timeseries)
 
 def noisy_brightness(phi0: rad, d: float, period: s, peak: float,
-stddev: float, timeline: np.array) -> np.array:
+stddev: float, timeseries: np.array) -> np.array:
     """
     Observed brightness of a pulsar using a von Mises distribution for a time
     series with gaussian noise for a given standard deviation.
@@ -145,7 +149,7 @@ stddev: float, timeline: np.array) -> np.array:
         Peak brightness of the pulsar.
     stddev: float
         Amount of dispersion for the peak values.
-    timelime: np.array
+    timeseries: np.array
         Time series in which the first dimension contains time values in 
         seconds.
 
@@ -156,10 +160,10 @@ stddev: float, timeline: np.array) -> np.array:
         Observed brightness with noise at each data point in the time series.
     """
 
-    noise = gaussian_noise(timeline, stddev)
+    noise = gaussian_noise(timeseries, stddev)
     acc = []
 
-    for n, time in zip(noise, timeline):
+    for n, time in zip(noise, timeseries):
         b = brightness(phi0, d, period, peak+n, time)
         acc.append(b)
 
@@ -226,7 +230,35 @@ def gaussian_noise(signal: np.array, stddev: float) -> np.array:
     n = signal.shape
     return np.random.normal(0, stddev, n)
 
-def search_template(phi0: rad, d: float, period: s,
- timeline: np.array) -> np.array:
-    peak = 1
-    return linear_brightness(phi0, d, period, peak, timeline)
+def measurement() -> np.array:
+    return None
+
+def search_parameters() -> np.array:
+    Parameters = namedtuple('Parameters', ['D', 'omega', 'phi0'])
+
+    omega = lambda T: 2*pi*rad/(T*s)
+
+    return np.array([
+        Parameters(0,   omega(.1),  0*rad),
+        Parameters(.4,  omega(.2),  pi/4*rad),
+        Parameters(.8,  omega(.3),  pi*rad),
+        Parameters(.1,  omega(.01), 1*rad), # original values
+        Parameters(.12, omega(.02), pi/2*rad),
+        Parameters(.16, omega(.03), 3*pi/4*rad),
+    ])
+
+def search_templates(timeseries: np.array, params=[]) -> np.array:
+    peak = 1 # unit
+
+    if len(params) == 0:
+        params = search_parameters()
+
+    acc = []
+    for d, omega, phi0 in params:
+        kappa = concentration(d)
+        phi = phi0 + omega*timeseries
+        
+        brightness = peak * np.exp(kappa * np.cos(phi - MU))
+        acc.append(brightness)
+
+    return acc
