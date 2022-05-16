@@ -3,6 +3,7 @@ import numpy as np
 from astropy.units import s, rad
 from scipy.integrate import quad
 from collections import namedtuple
+from typing import List
 
 # Measure of location (the distribution is clustered around mu).
 # Analogous to the mean in a normal distribuition.
@@ -233,19 +234,19 @@ def gaussian_noise(signal: np.array, stddev: float) -> np.array:
 def measurement() -> np.array:
     return None
 
-def search_parameters() -> np.array:
+def search_parameters() -> List:
     Parameters = namedtuple('Parameters', ['D', 'omega', 'phi0'])
 
-    omega = lambda T: 2*pi*rad/(T*s)
+    omega = lambda T: (2*pi*rad)/(T*s)
 
-    return np.array([
-        Parameters(0,   omega(.1),  0*rad),
-        Parameters(.4,  omega(.2),  pi/4*rad),
+    return [
+        Parameters(.2,  omega(.1),  0*rad),
+        Parameters(.4,  omega(.2),  (pi/4)*rad),
         Parameters(.8,  omega(.3),  pi*rad),
         Parameters(.1,  omega(.01), 1*rad), # original values
-        Parameters(.12, omega(.02), pi/2*rad),
-        Parameters(.16, omega(.03), 3*pi/4*rad),
-    ])
+        Parameters(.12, omega(.02), (pi/2)*rad),
+        Parameters(.16, omega(.03), (3*pi/4)*rad),
+    ]
 
 def search_templates(timeseries: np.array, params=[]) -> np.array:
     peak = 1 # unit
@@ -257,8 +258,7 @@ def search_templates(timeseries: np.array, params=[]) -> np.array:
     for d, omega, phi0 in params:
         kappa = concentration(d)
         phi = phi0 + omega*timeseries
-        
         brightness = peak * np.exp(kappa * np.cos(phi - MU))
         acc.append(brightness)
 
-    return acc
+    return np.array(acc)

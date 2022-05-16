@@ -1,3 +1,4 @@
+from re import template
 import unittest
 import numpy as np
 from math import log, pi, sin
@@ -91,7 +92,7 @@ class TestLinearBrightness(unittest.TestCase):
 
 class TestSearchTemplates(unittest.TestCase):
 
-    def test_at_peak_unit(self):
+    def test_with_original_profile(self):
         timeseries = np.linspace(0, 2, 1000) * s
         params = [Parameters(.1, 2*pi*rad/(0.01*s), 1*rad)]
         templates = search_templates(timeseries, params)
@@ -106,3 +107,10 @@ class TestSearchTemplates(unittest.TestCase):
         
         # highest
         self.assertAlmostEqual(i[-1].value, 1.414371e6, 0)
+
+    def test_with_sample_parameters(self):
+        n = 1000
+        timeseries = np.linspace(0, 2, n) * s
+        templates = search_templates(timeseries)
+
+        self.assertEqual(templates.shape, (6, n))
